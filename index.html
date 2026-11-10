@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설월여고 디지털 현미경 갤러리</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Noto Sans KR) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            300: '#7cc5fb',
+                            400: '#36a9f7',
+                            500: '#0c8de9',
+                            600: '#006ec7',
+                            700: '#0058a3',
+                            800: '#054b87',
+                            900: '#0a3f70',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+        }
+        .modal-backdrop {
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-brand-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-brand-600 to-brand-400 text-white p-2.5 rounded-xl shadow-md shadow-brand-500/20">
+                    <i class="fa-solid to-microscope text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold text-brand-600 tracking-wider uppercase block">Seolwol Girls' High School</span>
+                    <h1 class="text-lg font-bold text-slate-800 leading-none">설월여고 디지털 현미경 갤러리</h1>
+                </div>
+            </div>
+
+            <!-- Header Action Button -->
+            <button onclick="openModal('createPostModal')" class="bg-brand-500 hover:bg-brand-600 text-white font-medium px-4 py-2 rounded-xl shadow-sm transition duration-150 flex items-center space-x-2 text-sm sm:text-base">
+                <i class="fa-solid fa-plus"></i>
+                <span class="hidden sm:inline">관찰일지 작성하기</span>
+                <span class="sm:hidden">작성</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Hero / Info Banner -->
+        <div class="bg-gradient-to-r from-brand-600 via-brand-500 to-brand-400 rounded-2xl p-6 sm:p-8 text-white shadow-lg mb-8 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+                <i class="fa-solid fa-dna text-[240px]"></i>
+            </div>
+            <div class="relative z-10 max-w-2xl">
+                <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-medium tracking-wide">생명과학 탐구활동</span>
+                <h2 class="text-2xl sm:text-3xl font-bold mt-2 mb-3">미시 세계 속 놀라운 생명의 아름다움 🔬</h2>
+                <p class="text-brand-100 text-sm sm:text-base leading-relaxed">
+                    디지털 현미경으로 직접 촬영한 세포, 조직, 미생물 사진을 공유해보세요. 
+                    친구들과 댓글로 질문을 주고받으며 지식을 함께 넓혀갈 수 있습니다.
+                </p>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="flex flex-col md:flex-row gap-4 mb-8 justify-between items-center bg-white p-4 rounded-2xl border border-brand-100 shadow-sm">
+            <!-- Filter Tabs -->
+            <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto w-full md:w-auto hide-scrollbar pb-2 md:pb-0" id="filterContainer">
+                <button onclick="filterGrade('all')" class="filter-btn active bg-brand-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition">전체 보기</button>
+                <button onclick="filterGrade('1')" class="filter-btn bg-slate-100 hover:bg-brand-50 text-slate-600 hover:text-brand-600 px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition">1학년</button>
+                <button onclick="filterGrade('2')" class="filter-btn bg-slate-100 hover:bg-brand-50 text-slate-600 hover:text-brand-600 px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition">2학년</button>
+                <button onclick="filterGrade('3')" class="filter-btn bg-slate-100 hover:bg-brand-50 text-slate-600 hover:text-brand-600 px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition">3학년</button>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative w-full md:w-72">
+                <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="제목, 학생 이름, 카테고리 검색..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:bg-white transition">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-sm"></i>
+            </div>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div id="postsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Posts will be injected here dynamically -->
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200 mt-4">
+            <div class="bg-brand-50 text-brand-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-microscope"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700">검색 결과가 없습니다</h3>
+            <p class="text-slate-500 text-sm mt-1">다른 검색어를 입력하거나 필터를 변경해 보세요.</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-sm py-8 border-t border-slate-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-microscope text-brand-400 text-lg"></i>
+                <span class="font-bold text-white">설월여자고등학교 생명과학실</span>
+            </div>
+            <p class="text-xs text-slate-500 text-center md:text-right">
+                © 2026 Seolwol Girls' High School Science Club. Digital Microscope Gallery.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Modal: Write Post -->
+    <div id="createPostModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden my-8 transform transition-all">
+            <div class="bg-brand-500 px-6 py-4 flex justify-between items-center text-white">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    현미경 관찰일지 등록
+                </h3>
+                <button onclick="closeModal('createPostModal')" class="text-white/80 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="postForm" onsubmit="submitPost(event)" class="p-6 space-y-4">
+                <!-- Student Info Section -->
+                <div class="grid grid-cols-4 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">학년</label>
+                        <select id="studentGrade" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-400 focus:outline-none">
+                            <option value="1">1학년</option>
+                            <option value="2">2학년</option>
+                            <option value="3">3학년</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">반</label>
+                        <input type="number" id="studentClass" min="1" max="15" placeholder="반" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">번호</label>
+                        <input type="number" id="studentNum" min="1" max="40" placeholder="번" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">이름</label>
+                        <input type="text" id="studentName" placeholder="이름" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-400 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Title & Magnification -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">관찰 대상 (제목)</label>
+                        <input type="text" id="postTitle" placeholder="예: 양파 표피세포 관찰" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">배율</label>
+                        <input type="text" id="postMagnification" placeholder="예: 400x" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-400 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">관찰 내용 및 특이사항</label>
+                    <textarea id="postContent" rows="3" placeholder="관찰된 구조나 특이한 점을 자유롭게 적어주세요." required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-400 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <!-- Image Selection -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">현미경 사진 첨부</label>
+                    <div class="flex flex-col gap-2">
+                        <input type="file" id="imageFileInput" accept="image/*" onchange="handleImageUpload(event)" class="text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100">
+                        <span class="text-xs text-slate-400 text-center">- 또는 샘플 이미지 선택 -</span>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" onclick="selectSampleImg('https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=600&q=80')" class="border rounded-lg p-1 hover:border-brand-500 text-xs text-slate-600">식물세포</button>
+                            <button type="button" onclick="selectSampleImg('https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=600&q=80')" class="border rounded-lg p-1 hover:border-brand-500 text-xs text-slate-600">미생물</button>
+                            <button type="button" onclick="selectSampleImg('https://images.unsplash.com/photo-1581093588401-fbb62a02f120?auto=format&fit=crop&w=600&q=80')" class="border rounded-lg p-1 hover:border-brand-500 text-xs text-slate-600">결정체</button>
+                            <button type="button" onclick="selectSampleImg('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80')" class="border rounded-lg p-1 hover:border-brand-500 text-xs text-slate-600">혈액/세포</button>
+                        </div>
+                    </div>
+                    <!-- Image Preview -->
+                    <div id="imagePreviewContainer" class="mt-3 hidden relative rounded-xl overflow-hidden border border-slate-200 max-h-48">
+                        <img id="imagePreview" src="" class="w-full h-full object-cover">
+                        <button type="button" onclick="clearImagePreview()" class="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1.5 hover:bg-black/80">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('createPostModal')" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm hover:bg-slate-50">취소</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-sm font-medium shadow-sm">업로드</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: View Post Detail & Comments -->
+    <div id="viewPostModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden my-8 transform transition-all flex flex-col max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span id="detailBadge" class="bg-brand-100 text-brand-700 text-xs font-semibold px-2.5 py-1 rounded-full"></span>
+                    <span id="detailStudent" class="text-sm font-semibold text-slate-700"></span>
+                </div>
+                <button onclick="closeModal('viewPostModal')" class="text-slate-400 hover:text-slate-600 text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-6 overflow-y-auto space-y-4 flex-grow">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 id="detailTitle" class="text-xl font-bold text-slate-800"></h2>
+                        <span id="detailMag" class="inline-block mt-1 bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded font-mono"></span>
+                    </div>
+                    <button id="deletePostBtn" onclick="confirmDeletePost()" class="text-xs text-rose-500 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1 font-medium">
+                        <i class="fa-regular fa-trash-can"></i> 게시물 삭제
+                    </button>
+                </div>
+
+                <!-- Image View -->
+                <div class="rounded-xl overflow-hidden bg-slate-900 border border-slate-200 max-h-96 flex items-center justify-center">
+                    <img id="detailImg" src="" alt="현미경 사진" class="w-full object-contain max-h-96">
+                </div>
+
+                <!-- Description -->
+                <p id="detailContent" class="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100"></p>
+
+                <!-- Actions (Like button) -->
+                <div class="flex items-center justify-between border-t border-b border-slate-100 py-3">
+                    <button id="detailLikeBtn" onclick="toggleLikeInModal()" class="flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition">
+                        <i class="fa-regular fa-heart text-lg"></i>
+                        <span>좋아요 <strong id="detailLikeCount">0</strong></span>
+                    </button>
+                    <span id="detailDate" class="text-xs text-slate-400"></span>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="space-y-3 pt-2">
+                    <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <i class="fa-regular fa-comments text-brand-500"></i>
+                        댓글 <span id="detailCommentCount" class="text-brand-500">0</span>
+                    </h4>
+
+                    <!-- Comment Input -->
+                    <form onsubmit="submitComment(event)" class="flex gap-2">
+                        <input type="text" id="commentAuthor" placeholder="이름/학번" required class="w-1/3 px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-400 focus:outline-none">
+                        <input type="text" id="commentText" placeholder="따뜻한 댓글이나 질문을 남겨주세요." required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-400 focus:outline-none">
+                        <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap">등록</button>
+                    </form>
+
+                    <!-- Comment List -->
+                    <div id="commentList" class="space-y-2 mt-3">
+                        <!-- Comments inserted dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white text-sm px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center space-x-2">
+        <i class="fa-solid fa-circle-check text-brand-400"></i>
+        <span id="toastMsg">메시지</span>
+    </div>
+
+    <!-- Modal: Delete Confirmation -->
+    <div id="deleteConfirmModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center space-y-4">
+            <div class="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg text-slate-800">게시물을 삭제할까요?</h3>
+                <p class="text-slate-500 text-xs mt-1">삭제된 관찰일지와 댓글은 복구할 수 없습니다.</p>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeModal('deleteConfirmModal')" class="flex-1 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50">취소</button>
+                <button onclick="executeDeletePost()" class="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-medium shadow-sm">삭제하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Sample Posts (Life Science Focus)
+        const initialPosts = [
+            {
+                id: 1,
+                grade: '2',
+                classNum: '3',
+                studentNum: '14',
+                studentName: '김설월',
+                title: '양파 표피세포와 핵 관찰 (아세트산카민 염색)',
+                magnification: '400x',
+                content: '생명과학I 시간에 실시한 양파 표피세포 추출 및 염색 실험입니다. 아세트산카민 용액으로 염색한 결과, 세포 중앙 근처에서 뚜렷하게 붉게 염색된 핵을 관찰할 수 있었습니다. 세포벽이 명확하여 직사각형 형태의 구조가 인상적이었습니다.',
+                imageUrl: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80',
+                likes: 18,
+                liked: false,
+                date: '2026.10.24',
+                comments: [
+                    { id: 101, author: '20302 이이슬', text: '핵이 진짜 뚜렷하게 염색 잘 됐네요! 배율 조정 팁 좀 공유해주세요.' },
+                    { id: 102, author: '김설월 (작성자)', text: '고배율로 올릴 때 조재경을 아주 천천히 돌리는 게 핵심이에요!' }
+                ]
+            },
+            {
+                id: 2,
+                grade: '2',
+                classNum: '1',
+                studentNum: '08',
+                studentName: '박지민',
+                title: '짚신벌레의 운동과 세포기관 형태',
+                magnification: '200x',
+                content: '학교 연못에서 채취한 물을 디지털 현미경으로 관찰했습니다. 섬모를 이용해 바쁘게 이동하는 짚신벌레를 발견했습니다! 식포와 수축포의 수축 운동도 관찰할 수 있어서 정말 신기했습니다.',
+                imageUrl: 'https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=800&q=80',
+                likes: 24,
+                liked: false,
+                date: '2026.10.25',
+                comments: [
+                    { id: 103, author: '30112 정수연', text: '움직이는 미생물 찍기 진짜 힘든데 대단해요!' }
+                ]
+            },
+            {
+                id: 3,
+                grade: '1',
+                classNum: '5',
+                studentNum: '22',
+                studentName: '최유진',
+                title: '사람의 구강 상피세포 관찰 (메틸렌블루 염색)',
+                magnification: '400x',
+                content: '동물세포의 특성을 확인하기 위해 구강 상피세포를 채취하여 메틸렌블루로 염색했습니다. 식물세포와 달리 세포벽이 없어서 형태가 불규칙적이고 둥글글한 형태를 띠는 것을 확인할 수 있었습니다.',
+                imageUrl: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+                likes: 12,
+                liked: false,
+                date: '2026.10.26',
+                comments: []
+            },
+            {
+                id: 4,
+                grade: '3',
+                classNum: '2',
+                studentNum: '03',
+                studentName: '강하은',
+                title: '검정말 잎 세포의 세포질 유동 현상',
+                magnification: '400x',
+                content: '검정말 잎을 받침 유리 위에 놓고 빛을 쬐어준 후 관찰했습니다. 세포 관찰 중 녹색의 엽록체들이 세포 가장자리를 따라 일정한 방향으로 이동하는 세포질 유동(Cytoplasmic streaming)을 생생하게 관찰했습니다.',
+                imageUrl: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
+                likes: 31,
+                liked: false,
+                date: '2026.10.26',
+                comments: [
+                    { id: 104, author: '10505 이수현', text: '영상으로 찍었어도 멋졌을 것 같아요! 엽록체가 또렷해요.' }
+                ]
+            },
+            {
+                id: 5,
+                grade: '1',
+                classNum: '4',
+                studentNum: '19',
+                studentName: '윤서연',
+                title: '비타민 C 재결정 결정 구조 분석',
+                magnification: '100x',
+                content: '비타민 C 수용액을 유리 슬라이드 위에서 건조시킨 후 디지털 편광 현미경 모드로 관찰한 결정 모습입니다. 생명활동에 필수적인 영양소의 화학적 결정 구조가 기하학적인 기판처럼 보여 매우 아름답습니다.',
+                imageUrl: 'https://images.unsplash.com/photo-1581093588401-fbb62a02f120?auto=format&fit=crop&w=800&q=80',
+                likes: 15,
+                liked: false,
+                date: '2026.10.27',
+                comments: []
+            }
+        ];
+
+        // State variables
+        let posts = [...initialPosts];
+        let currentFilterGrade = 'all';
+        let currentSearchQuery = '';
+        let activePostId = null;
+        let selectedBase64Image = null;
+
+        // Render Posts to DOM
+        function renderPosts() {
+            const grid = document.getElementById('postsGrid');
+            const emptyState = document.getElementById('emptyState');
+            grid.innerHTML = '';
+
+            const filtered = posts.filter(post => {
+                const matchGrade = currentFilterGrade === 'all' || post.grade === currentFilterGrade;
+                const searchLower = currentSearchQuery.toLowerCase();
+                const matchSearch = post.title.toLowerCase().includes(searchLower) ||
+                                    post.studentName.toLowerCase().includes(searchLower) ||
+                                    post.content.toLowerCase().includes(searchLower) ||
+                                    `${post.grade}학년 ${post.classNum}반`.includes(searchLower);
+                return matchGrade && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filtered.forEach(post => {
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-2xl border border-brand-100 shadow-sm hover:shadow-md transition duration-200 overflow-hidden flex flex-col cursor-pointer group relative";
+                    card.onclick = () => openViewModal(post.id);
+
+                    card.innerHTML = `
+                        <div class="relative h-52 bg-slate-100 overflow-hidden">
+                            <img src="${post.imageUrl}" alt="${post.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <span class="absolute top-3 left-3 bg-brand-500/90 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm font-medium">
+                                ${post.grade}학년 ${post.classNum}반 ${post.studentNum}번
+                            </span>
+                            <span class="absolute top-3 right-3 bg-slate-900/70 text-white text-xs px-2 py-0.5 rounded font-mono backdrop-blur-sm">
+                                ${post.magnification}
+                            </span>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow justify-between space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                                    <span>${post.studentName} 학생</span>
+                                    <span>${post.date}</span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base line-clamp-1 group-hover:text-brand-600 transition">${post.title}</h3>
+                                <p class="text-slate-500 text-xs mt-1 line-clamp-2 leading-relaxed">${post.content}</p>
+                            </div>
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-50 text-xs text-slate-500">
+                                <div class="flex items-center space-x-3">
+                                    <button onclick="event.stopPropagation(); toggleLike(${post.id})" class="flex items-center space-x-1 hover:text-rose-500 transition ${post.liked ? 'text-rose-500 font-bold' : ''}">
+                                        <i class="${post.liked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                                        <span>${post.likes}</span>
+                                    </button>
+                                    <span class="flex items-center space-x-1">
+                                        <i class="fa-regular fa-comment"></i>
+                                        <span>${post.comments.length}</span>
+                                    </span>
+                                </div>
+                                <button onclick="event.stopPropagation(); requestDeleteCard(${post.id})" class="text-slate-400 hover:text-rose-500 p-1 transition" title="삭제">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+        }
+
+        // Filter Function
+        function filterGrade(grade) {
+            currentFilterGrade = grade;
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-brand-500', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            });
+            event.target.classList.remove('bg-slate-100', 'text-slate-600');
+            event.target.classList.add('bg-brand-500', 'text-white');
+            renderPosts();
+        }
+
+        // Search Function
+        function handleSearch() {
+            currentSearchQuery = document.getElementById('searchInput').value;
+            renderPosts();
+        }
+
+        // Modal Control
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById(modalId).classList.add('flex');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        // Sample Image Selection
+        function selectSampleImg(url) {
+            selectedBase64Image = url;
+            const preview = document.getElementById('imagePreview');
+            const container = document.getElementById('imagePreviewContainer');
+            preview.src = url;
+            container.classList.remove('hidden');
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    selectedBase64Image = event.target.result;
+                    const preview = document.getElementById('imagePreview');
+                    const container = document.getElementById('imagePreviewContainer');
+                    preview.src = selectedBase64Image;
+                    container.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearImagePreview() {
+            selectedBase64Image = null;
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('imageFileInput').value = '';
+        }
+
+        // Submit New Post
+        function submitPost(e) {
+            e.preventDefault();
+            const grade = document.getElementById('studentGrade').value;
+            const classNum = document.getElementById('studentClass').value;
+            const studentNum = document.getElementById('studentNum').value;
+            const studentName = document.getElementById('studentName').value;
+            const title = document.getElementById('postTitle').value;
+            const magnification = document.getElementById('postMagnification').value;
+            const content = document.getElementById('postContent').value;
+
+            const imageUrl = selectedBase64Image || 'https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80';
+
+            const newPost = {
+                id: Date.now(),
+                grade,
+                classNum,
+                studentNum: studentNum.padStart(2, '0'),
+                studentName,
+                title,
+                magnification,
+                content,
+                imageUrl,
+                likes: 0,
+                liked: false,
+                date: new Date().toISOString().split('T')[0].replace(/-/g, '.'),
+                comments: []
+            };
+
+            posts.unshift(newPost);
+            renderPosts();
+            closeModal('createPostModal');
+            document.getElementById('postForm').reset();
+            clearImagePreview();
+            showToast('성공적으로 관찰일지가 게시되었습니다! 🎉');
+        }
+
+        // Toggle Like in Card
+        function toggleLike(id) {
+            const post = posts.find(p => p.id === id);
+            if (post) {
+                post.liked = !post.liked;
+                post.likes += post.liked ? 1 : -1;
+                renderPosts();
+            }
+        }
+
+        // Delete Post Functions
+        function requestDeleteCard(id) {
+            activePostId = id;
+            openModal('deleteConfirmModal');
+        }
+
+        function confirmDeletePost() {
+            if (!activePostId) return;
+            openModal('deleteConfirmModal');
+        }
+
+        function executeDeletePost() {
+            if (!activePostId) return;
+            posts = posts.filter(p => p.id !== activePostId);
+            closeModal('deleteConfirmModal');
+            closeModal('viewPostModal');
+            activePostId = null;
+            renderPosts();
+            showToast('게시물이 삭제되었습니다.');
+        }
+
+        // Open View Modal
+        function openViewModal(id) {
+            activePostId = id;
+            const post = posts.find(p => p.id === id);
+            if (!post) return;
+
+            document.getElementById('detailBadge').innerText = `${post.grade}학년 ${post.classNum}반 ${post.studentNum}번`;
+            document.getElementById('detailStudent').innerText = `${post.studentName} 학생`;
+            document.getElementById('detailTitle').innerText = post.title;
+            document.getElementById('detailMag').innerText = `배율: ${post.magnification}`;
+            document.getElementById('detailImg').src = post.imageUrl;
+            document.getElementById('detailContent').innerText = post.content;
+            document.getElementById('detailDate').innerText = `작성일: ${post.date}`;
+            document.getElementById('detailLikeCount').innerText = post.likes;
+
+            updateLikeBtnUI(post);
+            renderComments(post);
+
+            openModal('viewPostModal');
+        }
+
+        function updateLikeBtnUI(post) {
+            const btn = document.getElementById('detailLikeBtn');
+            if (post.liked) {
+                btn.className = "flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition bg-rose-50 text-rose-500 border border-rose-200";
+                btn.querySelector('i').className = "fa-solid fa-heart text-lg text-rose-500";
+            } else {
+                btn.className = "flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-100 text-slate-600 hover:bg-slate-200";
+                btn.querySelector('i').className = "fa-regular fa-heart text-lg";
+            }
+        }
+
+        function toggleLikeInModal() {
+            if (!activePostId) return;
+            toggleLike(activePostId);
+            const post = posts.find(p => p.id === activePostId);
+            document.getElementById('detailLikeCount').innerText = post.likes;
+            updateLikeBtnUI(post);
+        }
+
+        // Render Comments
+        function renderComments(post) {
+            const list = document.getElementById('commentList');
+            const count = document.getElementById('detailCommentCount');
+            list.innerHTML = '';
+            count.innerText = post.comments.length;
+
+            if (post.comments.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">첫 번째 댓글을 남겨보세요!</p>`;
+                return;
+            }
+
+            post.comments.forEach(c => {
+                const commentEl = document.createElement('div');
+                commentEl.className = "bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1";
+                commentEl.innerHTML = `
+                    <div class="flex justify-between font-semibold text-slate-700">
+                        <span>${c.author}</span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">${c.text}</p>
+                `;
+                list.appendChild(commentEl);
+            });
+        }
+
+        // Submit Comment
+        function submitComment(e) {
+            e.preventDefault();
+            if (!activePostId) return;
+
+            const authorInput = document.getElementById('commentAuthor');
+            const textInput = document.getElementById('commentText');
+
+            const post = posts.find(p => p.id === activePostId);
+            if (post) {
+                post.comments.push({
+                    id: Date.now(),
+                    author: authorInput.value,
+                    text: textInput.value
+                });
+
+                renderComments(post);
+                renderPosts();
+                authorInput.value = '';
+                textInput.value = '';
+                showToast('댓글이 작성되었습니다.');
+            }
+        }
+
+        // Toast Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Initial Initialization
+        window.onload = function() {
+            renderPosts();
+        }
+    </script>
+</body>
+</html>
